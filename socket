@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+
+#define SERVER_IP "172.18.58.150"
+#define PORT_INT 2222
+
+int main() {
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        perror("Erreur lors de la création du socket");
+        exit(EXIT_FAILURE);
+    }
+
+    struct sockaddr_in serverAddr = {
+            .sin_family = AF_INET,
+            .sin_port = htons(PORT_INT),
+            .sin_addr.s_addr = inet_addr(SERVER_IP)
+    };
+
+    int entier = 42;
+    sendto(sockfd, &entier, sizeof(entier), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
+
+    int inverseEntier;
+    socklen_t addrLen = sizeof(serverAddr);
+    recvfrom(sockfd, &inverseEntier, sizeof(inverseEntier), 0, (struct sockaddr *)&serverAddr, &addrLen);
+
+    printf("Entier reçu du serveur : %d\n", inverseEntier);
+
+    close(sockfd);
+
+    return 0;
+}
